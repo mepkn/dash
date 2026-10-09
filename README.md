@@ -16,7 +16,7 @@ fast it answered, under a strip of live CPU, memory, disk and uptime.
 
 ## Stack
 
-React 19 · TypeScript · Vite · Tailwind CSS v4 · Framer Motion · Convex · Vitest, plus a
+React 19 · TypeScript · Vite · Tailwind CSS v4 · shadcn/ui (Base UI) · Framer Motion · Convex · Vitest, plus a
 standard-library Python script on the VPS for monitoring.
 
 ## Development

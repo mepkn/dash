@@ -2,6 +2,9 @@ import { motion } from "framer-motion";
 import { ArrowDown, ArrowUp, Pencil } from "lucide-react";
 import { useState } from "react";
 import type { Doc } from "../../convex/_generated/dataModel";
+import { IconButton } from "@/components/IconButton";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { AppStatus } from "@/lib/live";
 import { cn, hostname, iconCandidates } from "@/lib/utils";
 
@@ -15,14 +18,19 @@ type Props = {
 };
 
 function StatusDot({ status, stale }: { status: AppStatus | undefined; stale: boolean }) {
-  if (!status || stale) {
-    return <span className="size-2 rounded-full bg-slate-600" title="No recent check" />;
-  }
+  const label =
+    !status || stale ? "No recent check" : status.up ? `Up · HTTP ${status.code}` : `Down · ${status.code ? `HTTP ${status.code}` : "no response"}`;
   return (
-    <span
-      className={cn("pulse-dot size-2 rounded-full", status.up ? "bg-ok text-ok/60" : "bg-pink text-pink/60")}
-      title={status.up ? `Up · HTTP ${status.code}` : `Down · ${status.code || "no response"}`}
-    />
+    <Tooltip>
+      <TooltipTrigger
+        render={<span role="img" aria-label={label} />}
+        className={cn(
+          "size-2 shrink-0 rounded-full",
+          !status || stale ? "bg-slate-600" : status.up ? "pulse-dot bg-ok text-ok/60" : "pulse-dot bg-pink text-pink/60",
+        )}
+      />
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -37,7 +45,7 @@ export function AppCard({ app, status, stale, editing, onEdit, onMove }: Props) 
         href={app.url}
         target="_blank"
         rel="noreferrer"
-        className="glass relative flex items-center gap-3.5 rounded-2xl p-4 overflow-hidden transition duration-300 hover:-translate-y-0.5 hover:border-white/15 focus-visible:outline-2 focus-visible:outline-cyan"
+        className="glass relative flex items-center gap-3.5 rounded-2xl p-4 overflow-hidden transition duration-300 hover:-translate-y-0.5 hover:border-white/15 focus-visible:outline-2 focus-visible:outline-ring"
         style={{ ["--accent" as string]: accent }}
       >
         {/* Accent glow that wakes up on hover. */}
@@ -51,33 +59,21 @@ export function AppCard({ app, status, stale, editing, onEdit, onMove }: Props) 
         </span>
         <span className="relative min-w-0 flex-1">
           <span className="flex items-center gap-2">
-            <span className="truncate font-medium text-slate-100">{app.name}</span>
+            <span className="truncate font-medium">{app.name}</span>
             <StatusDot status={status} stale={stale} />
           </span>
-          <span className="block truncate text-xs text-slate-400">{app.description || hostname(app.url)}</span>
+          <span className="block truncate text-xs text-muted-foreground">{app.description || hostname(app.url)}</span>
         </span>
         {status?.up && !stale && (
-          <span className="relative font-mono text-[11px] tabular-nums text-slate-500">{status.ms}ms</span>
+          <Badge variant="outline" className="relative font-mono tabular-nums text-muted-foreground">{status.ms}ms</Badge>
         )}
       </a>
 
       {editing && (
-        <div className="absolute -top-2 right-2 flex gap-1">
-          {[
-            { label: "Move up", icon: <ArrowUp size={12} />, run: () => onMove(-1) },
-            { label: "Move down", icon: <ArrowDown size={12} />, run: () => onMove(1) },
-            { label: "Edit", icon: <Pencil size={12} />, run: onEdit },
-          ].map((b) => (
-            <button
-              key={b.label}
-              type="button"
-              aria-label={`${b.label}: ${app.name}`}
-              onClick={b.run}
-              className="grid size-6 place-items-center rounded-md bg-slate-900 ring-1 ring-white/15 text-slate-300 hover:text-cyan hover:ring-cyan/50"
-            >
-              {b.icon}
-            </button>
-          ))}
+        <div className="absolute -top-2.5 right-2 flex gap-1">
+          <IconButton label={`Move ${app.name} up`} variant="outline" size="icon-xs" className="bg-popover" onClick={() => onMove(-1)}><ArrowUp /></IconButton>
+          <IconButton label={`Move ${app.name} down`} variant="outline" size="icon-xs" className="bg-popover" onClick={() => onMove(1)}><ArrowDown /></IconButton>
+          <IconButton label={`Edit ${app.name}`} variant="outline" size="icon-xs" className="bg-popover" onClick={onEdit}><Pencil /></IconButton>
         </div>
       )}
     </motion.div>

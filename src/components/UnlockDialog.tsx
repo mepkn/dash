@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from "react";
-import { cn } from "@/lib/utils";
-import { buttonClass, inputClass, Modal } from "./Modal";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 
 export function UnlockDialog({ open, onClose, onUnlock }: { open: boolean; onClose: () => void; onUnlock: (token: string) => void }) {
   const [value, setValue] = useState("");
@@ -11,14 +13,22 @@ export function UnlockDialog({ open, onClose, onUnlock }: { open: boolean; onClo
     onClose();
   };
   return (
-    <Modal open={open} title="Unlock edit mode" onClose={onClose}>
-      <form onSubmit={submit} className="space-y-3">
-        <input type="password" className={inputClass} placeholder="Edit token" value={value} onChange={(e) => setValue(e.target.value)} autoFocus />
-        <p className="text-xs text-slate-500">The EDIT_TOKEN set on the Convex deployment. Stored in this browser only.</p>
-        <div className="flex justify-end">
-          <button type="submit" className={cn(buttonClass, "bg-cyan text-slate-950 hover:bg-cyan/90")}>Unlock</button>
-        </div>
-      </form>
-    </Modal>
+    <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
+      <DialogContent>
+        <form onSubmit={submit} className="grid gap-4">
+          <DialogHeader>
+            <DialogTitle>Unlock edit mode</DialogTitle>
+            <DialogDescription>The EDIT_TOKEN set on the Convex deployment. Stored in this browser only.</DialogDescription>
+          </DialogHeader>
+          <Field>
+            <FieldLabel htmlFor="edit-token">Edit token</FieldLabel>
+            <Input id="edit-token" type="password" value={value} onChange={(e) => setValue(e.target.value)} autoFocus />
+          </Field>
+          <DialogFooter>
+            <Button type="submit" disabled={!value.trim()}>Unlock</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -5,8 +5,11 @@ import { api } from "../convex/_generated/api";
 import type { Doc, Id } from "../convex/_generated/dataModel";
 import { AppCard } from "@/components/AppCard";
 import { AppDialog } from "@/components/AppDialog";
+import { IconButton } from "@/components/IconButton";
 import { StatsStrip } from "@/components/StatsStrip";
 import { UnlockDialog } from "@/components/UnlockDialog";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { Kbd } from "@/components/ui/kbd";
 import { useEditToken } from "@/lib/edit";
 import { useLive, type Stats, type Status } from "@/lib/live";
 import { groupBy, hostname } from "@/lib/utils";
@@ -74,21 +77,21 @@ export default function App() {
 
       <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-cyan/80">pknspace</p>
+          <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary/80">pknspace</p>
           <h1 className="mt-1 bg-gradient-to-r from-white via-slate-200 to-violet bg-clip-text text-4xl font-semibold tracking-tight text-transparent sm:text-5xl">
             {now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
           </h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-muted-foreground">
             {now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" })}
             {apps && !stale && (
-              <span className="ml-2 font-mono text-xs text-slate-500">· {upCount}/{apps.length} up</span>
+              <span className="ml-2 font-mono text-xs text-muted-foreground/70">· {upCount}/{apps.length} up</span>
             )}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <label className="glass flex items-center gap-2 rounded-xl px-3 py-2 text-sm focus-within:border-cyan/40">
-            <Search size={15} className="text-slate-500" />
-            <input
+          <InputGroup className="glass h-10 w-52 rounded-xl sm:w-64">
+            <InputGroupAddon><Search /></InputGroupAddon>
+            <InputGroupInput
               ref={searchRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -98,37 +101,37 @@ export default function App() {
               }}
               placeholder="Search apps"
               aria-label="Search apps"
-              className="w-36 bg-transparent placeholder:text-slate-500 focus:outline-none sm:w-48"
             />
-            <kbd className="rounded bg-white/5 px-1.5 font-mono text-[10px] text-slate-500">/</kbd>
-          </label>
+            <InputGroupAddon align="inline-end"><Kbd>/</Kbd></InputGroupAddon>
+          </InputGroup>
           {canEdit && (
-            <button type="button" onClick={() => setEditing(null)} aria-label="Add app" className="glass grid size-10 place-items-center rounded-xl text-cyan hover:border-cyan/40">
-              <Plus size={17} />
-            </button>
+            <IconButton label="Add app" variant="outline" size="icon-lg" className="glass size-10 rounded-xl text-primary" onClick={() => setEditing(null)}>
+              <Plus />
+            </IconButton>
           )}
-          <button
-            type="button"
+          <IconButton
+            label={canEdit ? "Lock edit mode" : "Unlock edit mode"}
+            variant="outline"
+            size="icon-lg"
+            className="glass size-10 rounded-xl text-muted-foreground"
             onClick={() => (canEdit ? setToken("") : setUnlockOpen(true))}
-            aria-label={canEdit ? "Lock edit mode" : "Unlock edit mode"}
-            className="glass grid size-10 place-items-center rounded-xl text-slate-400 hover:text-slate-100"
           >
-            {canEdit ? <LockOpen size={16} className="text-cyan" /> : <Lock size={16} />}
-          </button>
+            {canEdit ? <LockOpen className="text-primary" /> : <Lock />}
+          </IconButton>
         </div>
       </header>
 
       <StatsStrip stats={stats} />
 
       <main className="mt-10 space-y-10">
-        {apps === undefined && <p className="text-sm text-slate-500">Loading…</p>}
+        {apps === undefined && <p className="text-sm text-muted-foreground/70">Loading…</p>}
         {apps?.length === 0 && (
-          <p className="text-sm text-slate-400">No apps yet. {canEdit ? "Add one with +." : "Unlock edit mode to add some."}</p>
+          <p className="text-sm text-muted-foreground">No apps yet. {canEdit ? "Add one with +." : "Unlock edit mode to add some."}</p>
         )}
-        {apps && apps.length > 0 && filtered.length === 0 && <p className="text-sm text-slate-400">Nothing matches “{query}”.</p>}
+        {apps && apps.length > 0 && filtered.length === 0 && <p className="text-sm text-muted-foreground">Nothing matches “{query}”.</p>}
         {groups.map(([group, items]) => (
           <section key={group}>
-            <h2 className="mb-3 flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-slate-400">
+            <h2 className="mb-3 flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
               {group}
               <span className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent" />
             </h2>

@@ -6,7 +6,9 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist', 'convex/_generated', 'server']),
+  // src/components/ui is vendored shadcn/ui code: its lint findings are
+  // upstream's to fix and would be undone by the next `shadcn add`.
+  globalIgnores(['dist', 'convex/_generated', 'server', 'src/components/ui/**']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
