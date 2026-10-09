@@ -1,0 +1,7 @@
+{
+  "checkedAt": 1760054400,
+  "cpu": { "cores": 1, "percent": 42 },
+  "memory": { "usedMb": 1210, "totalMb": 1967, "percent": 62 },
+  "disk": { "usedGb": 18.4, "totalGb": 39.1, "percent": 47 },
+  "uptimeSec": 1987200
+}

@@ -1,0 +1,8 @@
+{
+  "checkedAt": 1760054400,
+  "apps": {
+    "https://picki.pknspace.com": { "up": true, "code": 200, "ms": 84 },
+    "https://akinator.pknspace.com": { "up": true, "code": 200, "ms": 112 },
+    "https://class.pknspace.com": { "up": false, "code": 502, "ms": 31 }
+  }
+}

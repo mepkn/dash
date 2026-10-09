@@ -1,0 +1,17 @@
+# Appended to /etc/caddy/Caddyfile by setup.sh.
+http://dash.pknspace.com:8080 {
+      encode gzip
+
+      handle /live/* {
+            root * /var/www/dash-live
+            uri strip_prefix /live
+            header Cache-Control "no-store"
+            file_server
+      }
+
+      handle {
+            root * /var/www/dash
+            try_files {path} /index.html
+            file_server
+      }
+}
