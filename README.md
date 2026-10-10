@@ -75,7 +75,8 @@ routes `dash.pknspace.com` to `http://localhost:8080`, like the other apps.
   token in localStorage.
 - Status and stats never touch Convex, to stay well inside the free plan. `server/live.py`
   runs from cron every minute: it checks each app's URL, samples CPU, memory and disk, and
-  writes `status.json` / `stats.json` atomically. It refreshes the app list from Convex at
+  writes `status.json` / `stats.json` atomically. HTTP 200–399 counts as up, and so does 401,
+  since a password-protected app is running even though the check can't log in. It refreshes the app list from Convex at
   most once an hour (cached in `apps.json`), about 720 calls a month.
 - The page polls `/live/*.json` every 30 s while the tab is visible, so numbers are at most
   about 90 s old. Response time is measured from the VPS through Cloudflare, so it is the

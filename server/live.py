@@ -57,7 +57,8 @@ def check(url: str) -> tuple[str, dict]:
     except Exception:
         code = 0
     ms = round((time.monotonic() - start) * 1000)
-    return url, {"up": 200 <= code < 400, "code": code, "ms": ms}
+    # 401 means the server answered and wants a login (e.g. Basic Auth), so it's up.
+    return url, {"up": 200 <= code < 400 or code == 401, "code": code, "ms": ms}
 
 
 def cpu_percent() -> float:
