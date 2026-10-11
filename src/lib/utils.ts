@@ -13,9 +13,14 @@ export function hostname(url: string): string {
   }
 }
 
-/** Icons to try in order: the custom one, then the site's own favicons. */
-export function iconCandidates(url: string, custom?: string): string[] {
+/**
+ * Icons to try in order: the custom one, then the site's own favicons.
+ * `siteIcons: false` skips the favicons, e.g. for Basic Auth sites, where fetching
+ * one makes the browser pop up a sign-in prompt.
+ */
+export function iconCandidates(url: string, custom?: string, siteIcons = true): string[] {
   const candidates = custom ? [custom] : [];
+  if (!siteIcons) return candidates;
   try {
     candidates.push(new URL("/favicon.svg", url).href, new URL("/favicon.ico", url).href);
   } catch {

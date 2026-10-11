@@ -38,5 +38,6 @@ describe("iconCandidates", () => {
       "https://a.com/favicon.ico",
     ]);
     expect(iconCandidates("nope")).toEqual([]);
+    expect(iconCandidates("https://a.com", "https://cdn/i.png", false)).toEqual(["https://cdn/i.png"]);
   });
 });

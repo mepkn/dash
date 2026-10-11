@@ -37,7 +37,9 @@ function StatusDot({ status, stale }: { status: AppStatus | undefined; stale: bo
 export function AppCard({ app, status, stale, editing, onEdit, onMove }: Props) {
   const [iconIndex, setIconIndex] = useState(0);
   const accent = app.accent || "#00f0ff";
-  const icon = iconCandidates(app.url, app.icon)[iconIndex];
+  // Wait for the status check before fetching favicons, and skip them on 401
+  // (Basic Auth) sites, where the request would trigger the browser's sign-in prompt.
+  const icon = iconCandidates(app.url, app.icon, status !== undefined && status.code !== 401)[iconIndex];
 
   return (
     <motion.div layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="group relative">
