@@ -1,6 +1,6 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useMutation, useQuery } from "convex/react";
-import { Lock, LockOpen, Plus, Search } from "lucide-react";
+import { LockOpen, Plus, Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../convex/_generated/api";
 import type { Doc, Id } from "../convex/_generated/dataModel";
@@ -116,19 +116,21 @@ function Dashboard({ canEdit }: { canEdit: boolean }) {
             <InputGroupAddon align="inline-end"><Kbd>/</Kbd></InputGroupAddon>
           </InputGroup>
           {canEdit && (
-            <IconButton label="Add app" variant="outline" size="icon-lg" className="glass size-10 rounded-xl text-primary" onClick={() => setEditing(null)}>
-              <Plus />
-            </IconButton>
+            <>
+              <IconButton label="Add app" variant="outline" size="icon-lg" className="glass size-10 rounded-xl text-primary" onClick={() => setEditing(null)}>
+                <Plus />
+              </IconButton>
+              <IconButton
+                label="Sign out of edit mode"
+                variant="outline"
+                size="icon-lg"
+                className="glass size-10 rounded-xl text-muted-foreground"
+                onClick={() => void signOut().then(() => location.assign("/"))}
+              >
+                <LockOpen className="text-primary" />
+              </IconButton>
+            </>
           )}
-          <IconButton
-            label={canEdit ? "Sign out of edit mode" : "Edit mode"}
-            variant="outline"
-            size="icon-lg"
-            className="glass size-10 rounded-xl text-muted-foreground"
-            onClick={() => (canEdit ? void signOut().then(() => location.assign("/")) : location.assign("/edit"))}
-          >
-            {canEdit ? <LockOpen className="text-primary" /> : <Lock />}
-          </IconButton>
         </div>
       </header>
 
@@ -137,7 +139,7 @@ function Dashboard({ canEdit }: { canEdit: boolean }) {
       <main className="mt-10 space-y-10">
         {apps === undefined && <p className="text-sm text-muted-foreground/70">Loading…</p>}
         {apps?.length === 0 && (
-          <p className="text-sm text-muted-foreground">No apps yet. {canEdit ? "Add one with +." : "Sign in at /edit to add some."}</p>
+          <p className="text-sm text-muted-foreground">No apps yet. {canEdit && "Add one with +."}</p>
         )}
         {apps && apps.length > 0 && filtered.length === 0 && <p className="text-sm text-muted-foreground">Nothing matches “{query}”.</p>}
         {groups.map(([group, items]) => (

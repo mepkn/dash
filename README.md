@@ -12,7 +12,7 @@ fast it answered, under a strip of live CPU, memory, disk and uptime.
 - Server stats: CPU %, memory, disk and uptime of the VPS.
 - Search: `/` to focus, Enter opens the first match, Esc clears.
 - Edit mode at `/edit`: sign in with an email on `EDITOR_EMAILS` to add, edit, delete and
-  reorder apps. `/` is the read-only dashboard for everyone (the lock button links to `/edit`).
+  reorder apps. `/` is the read-only dashboard for everyone; nothing on it links to `/edit`.
 
 ## Stack
 
