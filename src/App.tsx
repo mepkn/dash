@@ -1,3 +1,4 @@
+import { useAuthActions } from "@convex-dev/auth/react";
 import { useMutation, useQuery } from "convex/react";
 import { Lock, LockOpen, Plus, Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -7,10 +8,10 @@ import { AppCard } from "@/components/AppCard";
 import { AppDialog } from "@/components/AppDialog";
 import { IconButton } from "@/components/IconButton";
 import { StatsStrip } from "@/components/StatsStrip";
-import { UnlockDialog } from "@/components/UnlockDialog";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Kbd } from "@/components/ui/kbd";
-import { useEditToken } from "@/lib/edit";
+import { EditGate } from "@/components/EditGate";
+import { isEditRoute } from "@/lib/route";
 import { useLive, type Stats, type Status } from "@/lib/live";
 import { groupBy, hostname } from "@/lib/utils";
 
@@ -27,16 +28,26 @@ function useClock() {
 }
 
 export default function App() {
+  return isEditRoute ? (
+    <EditGate>
+      <Dashboard canEdit />
+    </EditGate>
+  ) : (
+    <Dashboard canEdit={false} />
+  );
+}
+
+/** The dashboard. Editing controls only on /edit (EditGate has checked the allowlist). */
+function Dashboard({ canEdit }: { canEdit: boolean }) {
   const apps = useQuery(api.apps.list);
   const status = useLive<Status>("status.json");
   const stats = useLive<Stats>("stats.json");
-  const { token, canEdit, setToken } = useEditToken();
+  const { signOut } = useAuthActions();
   const reorder = useMutation(api.apps.reorder);
   const now = useClock();
 
   const [query, setQuery] = useState("");
   const [editing, setEditing] = useState<Doc<"apps"> | null | undefined>(undefined); // undefined = closed
-  const [unlockOpen, setUnlockOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
 
   // "/" focuses search, Enter opens the first match.
@@ -68,7 +79,7 @@ export default function App() {
     const j = i + dir;
     if (j < 0 || j >= ids.length) return;
     [ids[i], ids[j]] = [ids[j], ids[i]];
-    reorder({ token, ids });
+    reorder({ ids });
   };
 
   return (
@@ -110,11 +121,11 @@ export default function App() {
             </IconButton>
           )}
           <IconButton
-            label={canEdit ? "Lock edit mode" : "Unlock edit mode"}
+            label={canEdit ? "Sign out of edit mode" : "Edit mode"}
             variant="outline"
             size="icon-lg"
             className="glass size-10 rounded-xl text-muted-foreground"
-            onClick={() => (canEdit ? setToken("") : setUnlockOpen(true))}
+            onClick={() => (canEdit ? void signOut().then(() => location.assign("/")) : location.assign("/edit"))}
           >
             {canEdit ? <LockOpen className="text-primary" /> : <Lock />}
           </IconButton>
@@ -126,7 +137,7 @@ export default function App() {
       <main className="mt-10 space-y-10">
         {apps === undefined && <p className="text-sm text-muted-foreground/70">Loading…</p>}
         {apps?.length === 0 && (
-          <p className="text-sm text-muted-foreground">No apps yet. {canEdit ? "Add one with +." : "Unlock edit mode to add some."}</p>
+          <p className="text-sm text-muted-foreground">No apps yet. {canEdit ? "Add one with +." : "Sign in at /edit to add some."}</p>
         )}
         {apps && apps.length > 0 && filtered.length === 0 && <p className="text-sm text-muted-foreground">Nothing matches “{query}”.</p>}
         {groups.map(([group, items]) => (
@@ -156,10 +167,8 @@ export default function App() {
         open={editing !== undefined}
         app={editing ?? null}
         groups={[...new Set(apps?.map((a) => a.group))]}
-        token={token}
         onClose={() => setEditing(undefined)}
       />
-      <UnlockDialog open={unlockOpen} onClose={() => setUnlockOpen(false)} onUnlock={setToken} />
     </div>
   );
 }

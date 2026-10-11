@@ -11,12 +11,12 @@ fast it answered, under a strip of live CPU, memory, disk and uptime.
 - Live status: green/red dot and response time for each app, checked every minute.
 - Server stats: CPU %, memory, disk and uptime of the VPS.
 - Search: `/` to focus, Enter opens the first match, Esc clears.
-- Edit mode (lock button): add, edit, delete and reorder apps. Unlocked with an edit token;
-  everyone else gets a read-only dashboard.
+- Edit mode at `/edit`: sign in with an email on `EDITOR_EMAILS` to add, edit, delete and
+  reorder apps. `/` is the read-only dashboard for everyone (the lock button links to `/edit`).
 
 ## Stack
 
-React 19 · TypeScript · Vite · Tailwind CSS v4 · shadcn/ui (Base UI) · Framer Motion · Convex · Vitest, plus a
+React 19 · TypeScript · Vite · Tailwind CSS v4 · shadcn/ui (Base UI) · Framer Motion · Convex + `@convex-dev/auth` (Password) · Vitest, plus a
 standard-library Python script on the VPS for monitoring.
 
 ## Development
@@ -27,7 +27,7 @@ Requires Node 22.18+ (`.nvmrc` pins 22).
 npm install
 npx convex deployment select local   # first time only: dev runs on a local backend
 npm run convex:dev                   # starts the local backend (127.0.0.1:3210) and pushes convex/
-npx convex env set EDIT_TOKEN dev-token   # first time only: token for edit mode
+npm run setup:auth && npx convex env set SITE_URL http://localhost:5173 && npx convex env set EDITOR_EMAILS you@example.com   # first time only
 npm run dev
 ```
 
@@ -41,6 +41,7 @@ strip work locally without the VPS.
 | `npm run dev` | Dev server at http://localhost:5173 |
 | `npm run build` | Typecheck and production build into `dist/` |
 | `npm run convex:dev` / `convex:deploy` | Push backend functions to Convex |
+| `npm run setup:auth` | Generate and set `JWT_PRIVATE_KEY` + `JWKS` |
 | `npm run lint` | ESLint |
 | `npm test` | Unit tests (Vitest): URL, icon, uptime and grouping helpers |
 | `npm run check` | Typecheck, lint and tests |
@@ -51,9 +52,10 @@ strip work locally without the VPS.
 
 `scripts/deploy.sh` deploys `convex/` to the production deployment, builds the site with
 that deployment's URL, syncs `dist/` to the VPS and uploads `server/live.py`. Settings live
-in `.env.prod.local` (git-ignored, see `.env.example`): `CONVEX_DEPLOY_KEY`, `EDIT_TOKEN`
-(the production edit-mode token) and `DEPLOY_HOST` / `DEPLOY_PORT` / `DEPLOY_DIR` /
-`SERVER_DIR`. Set the token on the deployment with `npx convex env set --prod EDIT_TOKEN ...`.
+in `.env.prod.local` (git-ignored, see `.env.example`): `CONVEX_DEPLOY_KEY` and `DEPLOY_HOST` / `DEPLOY_PORT` / `DEPLOY_DIR` /
+`SERVER_DIR`. Set up auth on the production deployment once:
+`node scripts/setup-auth-keys.ts --apply --prod`, `npx convex env set --prod SITE_URL https://dash.pknspace.com`
+and `npx convex env set --prod EDITOR_EMAILS you@example.com`.
 
 One-time VPS setup (already done):
 
@@ -71,8 +73,8 @@ routes `dash.pknspace.com` to `http://localhost:8080`, like the other apps.
 ## How it works
 
 - `convex/` holds one `apps` table (name, URL, group, description, icon, accent, order).
-  Reads are public; every write checks the `EDIT_TOKEN` env var, and the browser keeps the
-  token in localStorage.
+  Reads are public; every write checks that the caller is signed in and their email is in
+  `EDITOR_EMAILS` (at sign-in and again on every write).
 - Status and stats never touch Convex, to stay well inside the free plan. `server/live.py`
   runs from cron every minute: it checks each app's URL, samples CPU, memory and disk, and
   writes `status.json` / `stats.json` atomically. HTTP 200–399 counts as up, and so does 401,

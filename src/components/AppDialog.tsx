@@ -25,7 +25,6 @@ type Props = {
   open: boolean;
   app: Doc<"apps"> | null; // null = new app
   groups: string[];
-  token: string;
   onClose: () => void;
 };
 
@@ -40,7 +39,7 @@ export function AppDialog(props: Props) {
   );
 }
 
-function AppForm({ app, groups, token, onClose }: Props) {
+function AppForm({ app, groups, onClose }: Props) {
   const create = useMutation(api.apps.create);
   const update = useMutation(api.apps.update);
   const remove = useMutation(api.apps.remove);
@@ -74,7 +73,6 @@ function AppForm({ app, groups, token, onClose }: Props) {
   const submit = (e: FormEvent) => {
     e.preventDefault();
     const fields = {
-      token,
       name: form.name.trim(),
       url: normalizeUrl(form.url),
       group: form.group.trim() || "Apps",
@@ -143,7 +141,7 @@ function AppForm({ app, groups, token, onClose }: Props) {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction variant="destructive" onClick={() => run(() => remove({ token, id: app._id }))}>Remove</AlertDialogAction>
+                <AlertDialogAction variant="destructive" onClick={() => run(() => remove({ id: app._id }))}>Remove</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
