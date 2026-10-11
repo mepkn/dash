@@ -4,7 +4,7 @@ import type { QueryCtx } from "../_generated/server";
 import { isEditorEmail } from "./editors";
 
 /**
- * Throws unless the caller is signed in AND their email is in EDITOR_EMAILS.
+ * Throws unless the caller is signed in AND their email is in ALLOWED_EMAILS.
  * Checked on every write, so removing an email cuts off existing sessions.
  */
 export async function requireEditor(ctx: QueryCtx) {

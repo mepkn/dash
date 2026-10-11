@@ -8,7 +8,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [
     Password({
       // Runs for sign-up and sign-in alike, before anything is stored. Rejecting
-      // non-allowlisted emails here means nobody outside EDITOR_EMAILS can sign up.
+      // non-allowlisted emails here means nobody outside ALLOWED_EMAILS can sign up.
       profile(params) {
         const email = String(params.email ?? "").trim().toLowerCase();
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {

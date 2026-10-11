@@ -11,7 +11,7 @@ fast it answered, under a strip of live CPU, memory, disk and uptime.
 - Live status: green/red dot and response time for each app, checked every minute.
 - Server stats: CPU %, memory, disk and uptime of the VPS.
 - Search: `/` to focus, Enter opens the first match, Esc clears.
-- Edit mode at `/edit`: sign in with an email on `EDITOR_EMAILS` to add, edit, delete and
+- Edit mode at `/edit`: sign in with an email on `ALLOWED_EMAILS` to add, edit, delete and
   reorder apps. `/` is the read-only dashboard for everyone; nothing on it links to `/edit`.
 
 ## Stack
@@ -27,7 +27,7 @@ Requires Node 22.18+ (`.nvmrc` pins 22).
 npm install
 npx convex deployment select local   # first time only: dev runs on a local backend
 npm run convex:dev                   # starts the local backend (127.0.0.1:3210) and pushes convex/
-npm run setup:auth && npx convex env set SITE_URL http://localhost:5173 && npx convex env set EDITOR_EMAILS you@example.com   # first time only
+npm run setup:auth && npx convex env set SITE_URL http://localhost:5173 && npx convex env set ALLOWED_EMAILS you@example.com   # first time only
 npm run dev
 ```
 
@@ -55,7 +55,7 @@ that deployment's URL, syncs `dist/` to the VPS and uploads `server/live.py`. Se
 in `.env.prod.local` (git-ignored, see `.env.example`): `CONVEX_DEPLOY_KEY` and `DEPLOY_HOST` / `DEPLOY_PORT` / `DEPLOY_DIR` /
 `SERVER_DIR`. Set up auth on the production deployment once:
 `node scripts/setup-auth-keys.ts --apply --prod`, `npx convex env set --prod SITE_URL https://dash.pknspace.com`
-and `npx convex env set --prod EDITOR_EMAILS you@example.com`.
+and `npx convex env set --prod ALLOWED_EMAILS you@example.com`.
 
 One-time VPS setup (already done):
 
@@ -74,7 +74,7 @@ routes `dash.pknspace.com` to `http://localhost:8080`, like the other apps.
 
 - `convex/` holds one `apps` table (name, URL, group, description, icon, accent, order).
   Reads are public; every write checks that the caller is signed in and their email is in
-  `EDITOR_EMAILS` (at sign-in and again on every write).
+  `ALLOWED_EMAILS` (at sign-in and again on every write).
 - Status and stats never touch Convex, to stay well inside the free plan. `server/live.py`
   runs from cron every minute: it checks each app's URL, samples CPU, memory and disk, and
   writes `status.json` / `stats.json` atomically. HTTP 200–399 counts as up, and so does 401,

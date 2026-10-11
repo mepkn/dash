@@ -2,7 +2,7 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { requireEditor } from "./lib/access";
 
-// Reads are public; every write requires a signed-in editor (EDITOR_EMAILS).
+// Reads are public; every write requires a signed-in editor (ALLOWED_EMAILS).
 
 const fields = {
   name: v.string(),
