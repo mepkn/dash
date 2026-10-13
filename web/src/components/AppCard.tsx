@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowDown, ArrowUp, Pencil } from "lucide-react";
 import { useState } from "react";
-import type { Doc } from "../../convex/_generated/dataModel";
+import type { Doc } from "@convex/_generated/dataModel";
 import { IconButton } from "@/components/IconButton";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";

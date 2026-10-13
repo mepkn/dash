@@ -24,14 +24,14 @@ standard-library Python script on the VPS for monitoring.
 Requires Node 22.18+ (`.nvmrc` pins 22).
 
 ```bash
-npm install
+npm install && npm run web:install
 npx convex deployment select local   # first time only: dev runs on a local backend
 npm run convex:dev                   # starts the local backend (127.0.0.1:3210) and pushes convex/
 npm run setup:auth && npx convex env set SITE_URL http://localhost:5173 && npx convex env set ALLOWED_EMAILS you@example.com   # first time only
 npm run dev
 ```
 
-`public/live/status.json` and `stats.json` are sample files, so the status dots and stats
+`web/public/live/status.json` and `stats.json` are sample files, so the status dots and stats
 strip work locally without the VPS.
 
 ## Scripts
@@ -39,19 +39,19 @@ strip work locally without the VPS.
 | Command | What it does |
 |---|---|
 | `npm run dev` | Dev server at http://localhost:5173 |
-| `npm run build` | Typecheck and production build into `dist/` |
+| `npm run web:install` | Install the web app's dependencies (`web/` has its own `package.json`) |
+| `npm run build` | Typecheck and production build into `web/dist/` |
 | `npm run convex:dev` / `convex:deploy` | Push backend functions to Convex |
 | `npm run setup:auth` | Generate and set `JWT_PRIVATE_KEY` + `JWKS` |
-| `npm run lint` | ESLint |
-| `npm test` | Unit tests (Vitest): URL, icon, uptime and grouping helpers |
-| `npm run check` | Typecheck, lint and tests |
+| `npm run lint` | ESLint (backend and scripts; the web app is linted by `check`) |
+| `npm run check` | Typecheck and lint the backend, then typecheck, lint and test the web app (Vitest: URL, icon, uptime and grouping helpers) |
 | `npm run deploy` | Checks, deploys Convex to production, builds and uploads the site and `live.py` to the VPS |
 | `npm run deploy:dry` | Same, but only previews: nothing is deployed or uploaded |
 
 ## Deployment
 
 `scripts/deploy.sh` deploys `convex/` to the production deployment, builds the site with
-that deployment's URL, syncs `dist/` to the VPS and uploads `server/live.py`. Settings live
+that deployment's URL, syncs `web/dist/` to the VPS and uploads `server/live.py`. Settings live
 in `.env.prod.local` (git-ignored, see `.env.example`): `CONVEX_DEPLOY_KEY` and `DEPLOY_HOST` / `DEPLOY_PORT` / `DEPLOY_DIR` /
 `SERVER_DIR`. Set up auth on the production deployment once:
 `node scripts/setup-auth-keys.ts --apply --prod`, `npx convex env set --prod SITE_URL https://dash.pknspace.com`
@@ -85,5 +85,5 @@ routes `dash.pknspace.com` to `http://localhost:8080`, like the other apps.
   public round trip, not your browser's load time.
 - There is no load average: the VPS is an LXC container, where `/proc/loadavg` reports the
   whole host.
-- `public/sw.js` is a kill switch for the service worker the old Homer dashboard registered;
+- `web/public/sw.js` is a kill switch for the service worker the old Homer dashboard registered;
   it clears Homer's caches and unregisters itself.

@@ -1,7 +1,7 @@
 import { useMutation } from "convex/react";
 import { useState, type FormEvent } from "react";
-import { api } from "../../convex/_generated/api";
-import type { Doc } from "../../convex/_generated/dataModel";
+import { api } from "@convex/_generated/api";
+import type { Doc } from "@convex/_generated/dataModel";
 import {
   AlertDialog,
   AlertDialogAction,

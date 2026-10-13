@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { useConvexAuth, useQuery } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { ShieldX } from "lucide-react";
-import { api } from "../../convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { SignInPage } from "./SignInPage";
 
