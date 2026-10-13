@@ -24,11 +24,11 @@ standard-library Python script on the VPS for monitoring.
 Requires Node 22.18+ (`.nvmrc` pins 22).
 
 ```bash
-npm install && npm run web:install
+cd backend && npm install
 npx convex deployment select local   # first time only: dev runs on a local backend
-npm run convex:dev                   # starts the local backend (127.0.0.1:3210) and pushes convex/
+npm run dev                          # starts the local backend (127.0.0.1:3210) and pushes convex/
 npm run setup:auth && npx convex env set SITE_URL http://localhost:5173 && npx convex env set ALLOWED_EMAILS you@example.com   # first time only
-npm run dev
+cd ../web && npm install && npm run dev   # in a second terminal
 ```
 
 `web/public/live/status.json` and `stats.json` are sample files, so the status dots and stats
@@ -38,22 +38,22 @@ strip work locally without the VPS.
 
 | Command | What it does |
 |---|---|
-| `npm run dev` | Dev server at http://localhost:5173 |
-| `npm run web:install` | Install the web app's dependencies (`web/` has its own `package.json`) |
-| `npm run build` | Typecheck and production build into `web/dist/` |
-| `npm run convex:dev` / `convex:deploy` | Push backend functions to Convex |
-| `npm run setup:auth` | Generate and set `JWT_PRIVATE_KEY` + `JWKS` |
-| `npm run lint` | ESLint (backend and scripts; the web app is linted by `check`) |
-| `npm run check` | Typecheck and lint the backend, then typecheck, lint and test the web app (Vitest: URL, icon, uptime and grouping helpers) |
-| `npm run deploy` | Checks, deploys Convex to production, builds and uploads the site and `live.py` to the VPS |
-| `npm run deploy:dry` | Same, but only previews: nothing is deployed or uploaded |
+| `npm run dev` (`web/`) | Dev server at http://localhost:5173 |
+| `npm run build` (`web/`) | Typecheck and production build into `web/dist/` |
+| `npm run check` (`web/`) | Typecheck, lint and tests (Vitest: URL, icon, uptime and grouping helpers) |
+| `npm run dev` (`backend/`) | Local Convex backend and function hot-reload |
+| `npm run setup:auth` (`backend/`) | Generate and set `JWT_PRIVATE_KEY` + `JWKS` |
+| `npm run check` (`backend/`) | Typecheck and lint |
+| `scripts/check.sh` | Every part's `check`; run before committing |
+| `scripts/deploy.sh` | Checks, deploys Convex to production, builds and uploads the site and `live.py` to the VPS |
+| `DRY_RUN=1 scripts/deploy.sh` | Same, but only previews: nothing is deployed or uploaded |
 
 ## Deployment
 
-`scripts/deploy.sh` deploys `convex/` to the production deployment, builds the site with
+`scripts/deploy.sh` deploys `backend/convex/` to the production deployment, builds the site with
 that deployment's URL, syncs `web/dist/` to the VPS and uploads `server/live.py`. Settings live
 in `.env.prod.local` (git-ignored, see `.env.example`): `CONVEX_DEPLOY_KEY` and `DEPLOY_HOST` / `DEPLOY_PORT` / `DEPLOY_DIR` /
-`SERVER_DIR`. Set up auth on the production deployment once:
+`SERVER_DIR`. Set up auth on the production deployment once, in `backend/`:
 `node scripts/setup-auth-keys.ts --apply --prod`, `npx convex env set --prod SITE_URL https://dash.pknspace.com`
 and `npx convex env set --prod ALLOWED_EMAILS you@example.com`.
 
@@ -72,7 +72,7 @@ routes `dash.pknspace.com` to `http://localhost:8080`, like the other apps.
 
 ## How it works
 
-- `convex/` holds one `apps` table (name, URL, group, description, icon, accent, order).
+- `backend/convex/` holds one `apps` table (name, URL, group, description, icon, accent, order).
   Reads are public; every write checks that the caller is signed in and their email is in
   `ALLOWED_EMAILS` (at sign-in and again on every write).
 - Status and stats never touch Convex, to stay well inside the free plan. `server/live.py`
