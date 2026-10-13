@@ -52,8 +52,9 @@ strip work locally without the VPS.
 
 `scripts/deploy.sh` deploys `backend/convex/` to the production deployment, builds the site with
 that deployment's URL, syncs `web/dist/` to the VPS and uploads `server/live.py`. Settings live
-in `.env.prod.local` (git-ignored, see `.env.example`): `CONVEX_DEPLOY_KEY` and `DEPLOY_HOST` / `DEPLOY_PORT` / `DEPLOY_DIR` /
-`SERVER_DIR`. Set up auth on the production deployment once, in `backend/`:
+in each part's `.env.prod.local` (git-ignored, see `.env.example`): `CONVEX_DEPLOY_KEY` in
+`backend/`, `DEPLOY_HOST` / `DEPLOY_PORT` / `DEPLOY_DIR` in `web/`, and `SERVER_DIR` / `LIVE_DIR`
+in `server/`. Set up auth on the production deployment once, in `backend/`:
 `node scripts/setup-auth-keys.ts --apply --prod`, `npx convex env set --prod SITE_URL https://dash.pknspace.com`
 and `npx convex env set --prod ALLOWED_EMAILS you@example.com`.
 
