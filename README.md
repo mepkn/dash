@@ -62,7 +62,7 @@ One-time VPS setup (already done):
 
 ```bash
 rsync -az -e "ssh -p 20044" server/ pkn@37.187.139.100:dash-server/
-ssh -t -p 20044 pkn@37.187.139.100 'sudo bash ~/dash-server/setup.sh'   # folders + Caddy site
+ssh -p 20044 pkn@37.187.139.100 'bash ~/dash-server/setup.sh'   # folders + Caddy site, no sudo
 # crontab -e (as pkn):
 # * * * * * /usr/bin/python3 /home/pkn/dash-server/live.py /var/www/dash-live https://whimsical-guineapig-290.convex.cloud >/dev/null 2>&1
 ```

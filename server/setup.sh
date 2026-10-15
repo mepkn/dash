@@ -1,18 +1,24 @@
 #!/usr/bin/env bash
-# One-time VPS setup (needs sudo): web folders owned by pkn and the Caddy site.
-#   scp -P 20044 server/setup.sh server/Caddyfile.snippet pkn@37.187.139.100:dash-server/
-#   ssh -t -p 20044 pkn@37.187.139.100 'sudo bash ~/dash-server/setup.sh'
+# One-time VPS setup (no sudo; run as pkn): web folders and the Caddy site in
+# /etc/caddy/sites/, which the main Caddyfile imports.
+#   rsync -az -e "ssh -p 20044" server/ pkn@37.187.139.100:dash-server/
+#   ssh -p 20044 pkn@37.187.139.100 'bash ~/dash-server/setup.sh'
 set -euo pipefail
 cd "$(dirname "$0")"
 
-install -d -o pkn -g pkn -m 755 /var/www/dash /var/www/dash-live
+mkdir -p /var/www/dash /var/www/dash-live
 
-if grep -q 'dash.pknspace.com' /etc/caddy/Caddyfile; then
-  echo "Caddyfile already has a dash block; leaving it alone."
+SITE=/etc/caddy/sites/dash.caddy
+if [ -f "$SITE" ]; then
+  echo "$SITE already exists; leaving it alone."
 else
-  cp /etc/caddy/Caddyfile "/etc/caddy/Caddyfile.bak.$(date +%Y%m%d%H%M%S)"
-  { echo; grep -v '^#' Caddyfile.snippet; } >> /etc/caddy/Caddyfile
-  caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
-  systemctl reload caddy
+  grep -v '^#' Caddyfile.snippet > "$SITE"
+  if caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile; then
+    caddy reload --config /etc/caddy/Caddyfile
+  else
+    rm "$SITE"
+    echo "Caddy config invalid; removed $SITE." >&2
+    exit 1
+  fi
 fi
 echo "Done."
