@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { GroupInput } from "@/components/GroupInput";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { normalizeUrl } from "@/lib/utils";
@@ -123,8 +124,7 @@ function AppForm({ app, groups, onClose }: Props) {
         </Field>
         <Field>
           <FieldLabel htmlFor="app-group">Group</FieldLabel>
-          <Input id="app-group" value={form.group} onChange={set("group")} list="dash-groups" />
-          <datalist id="dash-groups">{groups.map((g) => <option key={g} value={g} />)}</datalist>
+          <GroupInput id="app-group" value={form.group} groups={groups} onChange={(group) => setForm((f) => ({ ...f, group }))} />
         </Field>
         <Field>
           <FieldLabel htmlFor="app-description">Description</FieldLabel>
