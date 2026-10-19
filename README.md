@@ -6,8 +6,7 @@ fast it answered, under a strip of live CPU, memory, disk and uptime.
 
 ## Features
 
-- App cards grouped by section, with the app's own favicon (falls back to its first letter)
-  and an accent glow per app.
+- App cards grouped by section, with the app's own favicon (falls back to its first letter).
 - Live status: green/red dot and response time for each app, checked every minute.
 - Server stats: CPU %, memory, disk and uptime of the VPS.
 - Search: `/` to focus, Enter opens the first match, Esc clears.
@@ -73,7 +72,7 @@ routes `dash.pknspace.com` to `http://localhost:8080`, like the other apps.
 
 ## How it works
 
-- `backend/convex/` holds one `apps` table (name, URL, group, description, icon, accent, order).
+- `backend/convex/` holds one `apps` table (name, URL, group, description, icon, order).
   Reads are public; every write checks that the caller is signed in and their email is in
   `ALLOWED_EMAILS` (at sign-in and again on every write).
 - Status and stats never touch Convex, to stay well inside the free plan. `server/live.py`

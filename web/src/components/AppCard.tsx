@@ -36,7 +36,6 @@ function StatusDot({ status, stale }: { status: AppStatus | undefined; stale: bo
 
 export function AppCard({ app, status, stale, editing, onEdit, onMove }: Props) {
   const [iconIndex, setIconIndex] = useState(0);
-  const accent = app.accent || "#00f0ff";
   // Wait for the status check before fetching favicons, and skip them on 401
   // (Basic Auth) sites, where the request would trigger the browser's sign-in prompt.
   const icon = iconCandidates(app.url, app.icon, status !== undefined && status.code !== 401)[iconIndex];
@@ -48,15 +47,14 @@ export function AppCard({ app, status, stale, editing, onEdit, onMove }: Props) 
         target="_blank"
         rel="noreferrer"
         className="glass relative flex items-center gap-3.5 rounded-2xl p-4 overflow-hidden transition duration-300 hover:-translate-y-0.5 hover:border-white/15 focus-visible:outline-2 focus-visible:outline-ring"
-        style={{ ["--accent" as string]: accent }}
       >
-        {/* Accent glow that wakes up on hover. */}
-        <span className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 transition duration-300 group-hover:opacity-100 [background:radial-gradient(18rem_8rem_at_0%_0%,color-mix(in_srgb,var(--accent)_22%,transparent),transparent)]" />
+        {/* Glow that wakes up on hover. */}
+        <span className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 transition duration-300 group-hover:opacity-100 [background:radial-gradient(18rem_8rem_at_0%_0%,color-mix(in_srgb,#00f0ff_22%,transparent),transparent)]" />
         <span className="relative grid size-11 shrink-0 place-items-center rounded-xl bg-white/5 ring-1 ring-white/10">
           {icon ? (
             <img src={icon} alt="" className="size-6 object-contain" onError={() => setIconIndex((i) => i + 1)} />
           ) : (
-            <span className="text-lg font-semibold" style={{ color: accent }}>{app.name.charAt(0).toUpperCase()}</span>
+            <span className="text-lg font-semibold" style={{ color: "#00f0ff" }}>{app.name.charAt(0).toUpperCase()}</span>
           )}
         </span>
         <span className="relative min-w-0 flex-1">

@@ -10,7 +10,6 @@ const fields = {
   group: v.string(),
   description: v.optional(v.string()),
   icon: v.optional(v.string()),
-  accent: v.optional(v.string()),
 };
 
 export const list = query({
@@ -31,7 +30,8 @@ export const update = mutation({
   args: { id: v.id("apps"), ...fields },
   handler: async (ctx, { id, ...app }) => {
     await requireEditor(ctx);
-    await ctx.db.patch(id, app);
+    // Clear the retired accent field on old rows.
+    await ctx.db.patch(id, { ...app, accent: undefined });
   },
 });
 

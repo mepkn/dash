@@ -17,9 +17,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { cn, normalizeUrl } from "@/lib/utils";
+import { normalizeUrl } from "@/lib/utils";
 
-const ACCENTS = ["#00f0ff", "#8b5cf6", "#ff007a", "#00ffa3", "#ffb800", "#3b82f6"];
 
 type Props = {
   open: boolean;
@@ -49,7 +48,6 @@ function AppForm({ app, groups, onClose }: Props) {
     group: app?.group ?? groups[0] ?? "Apps",
     description: app?.description ?? "",
     icon: app?.icon ?? "",
-    accent: app?.accent ?? ACCENTS[0],
   });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -78,7 +76,6 @@ function AppForm({ app, groups, onClose }: Props) {
       group: form.group.trim() || "Apps",
       description: form.description.trim() || undefined,
       icon: form.icon.trim() || undefined,
-      accent: form.accent,
     };
     run(() => (app ? update({ id: app._id, ...fields }) : create(fields)));
   };
@@ -111,22 +108,6 @@ function AppForm({ app, groups, onClose }: Props) {
           <FieldLabel htmlFor="app-icon">Icon URL</FieldLabel>
           <Input id="app-icon" value={form.icon} onChange={set("icon")} />
           <FieldDescription>Optional. Defaults to the app's favicon.</FieldDescription>
-        </Field>
-        <Field>
-          <FieldLabel>Accent</FieldLabel>
-          <div className="flex gap-2.5">
-            {ACCENTS.map((c) => (
-              <button
-                key={c}
-                type="button"
-                aria-label={`Accent ${c}`}
-                aria-pressed={form.accent === c}
-                onClick={() => setForm((f) => ({ ...f, accent: c }))}
-                className={cn("size-6 rounded-full ring-2 ring-offset-2 ring-offset-popover transition", form.accent === c ? "ring-foreground/80" : "ring-transparent hover:ring-foreground/30")}
-                style={{ background: c }}
-              />
-            ))}
-          </div>
         </Field>
         {error && <FieldError>{error}</FieldError>}
       </FieldGroup>

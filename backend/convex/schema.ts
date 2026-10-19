@@ -11,7 +11,7 @@ export default defineSchema({
     description: v.optional(v.string()),
     // Icon image URL; when absent the app's /favicon.svg or /favicon.ico is used.
     icon: v.optional(v.string()),
-    // Accent colour for the card glow, e.g. "#00f0ff".
+    // Retired: no longer set or shown; kept so existing rows still validate.
     accent: v.optional(v.string()),
     order: v.number(),
   }).index("by_order", ["order"]),
