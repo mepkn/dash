@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { normalizeUrl } from "@/lib/utils";
 
 
@@ -30,7 +31,7 @@ type Props = {
 export function AppDialog(props: Props) {
   return (
     <Dialog open={props.open} onOpenChange={(next) => !next && props.onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-h-[90svh] overflow-y-auto sm:max-w-md">
         {/* Remount the form per app so its fields start from that app's values. */}
         <AppForm key={props.app?._id ?? "new"} {...props} />
       </DialogContent>
@@ -44,11 +45,15 @@ function AppForm({ app, groups, onClose }: Props) {
   const remove = useMutation(api.apps.remove);
   const [form, setForm] = useState({
     name: app?.name ?? "",
-    url: app?.url ?? "",
+    web: app?.web ?? app?.url ?? "",
+    android: app?.android ?? "",
+    desktop: app?.desktop ?? "",
+    repo: app?.repo ?? "",
     group: app?.group ?? groups[0] ?? "Apps",
     description: app?.description ?? "",
     icon: app?.icon ?? "",
   });
+  const [isPrivate, setPrivate] = useState(app?.private ?? false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -70,9 +75,17 @@ function AppForm({ app, groups, onClose }: Props) {
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
+    if (!form.web.trim() && !form.android.trim() && !form.desktop.trim()) {
+      setError("Add a web, Android or desktop link");
+      return;
+    }
     const fields = {
       name: form.name.trim(),
-      url: normalizeUrl(form.url),
+      web: form.web.trim() ? normalizeUrl(form.web) : undefined,
+      android: form.android.trim() ? normalizeUrl(form.android) : undefined,
+      desktop: form.desktop.trim() ? normalizeUrl(form.desktop) : undefined,
+      repo: form.repo.trim() ? normalizeUrl(form.repo) : undefined,
+      private: isPrivate || undefined,
       group: form.group.trim() || "Apps",
       description: form.description.trim() || undefined,
       icon: form.icon.trim() || undefined,
@@ -91,8 +104,22 @@ function AppForm({ app, groups, onClose }: Props) {
           <Input id="app-name" value={form.name} onChange={set("name")} required autoFocus />
         </Field>
         <Field>
-          <FieldLabel htmlFor="app-url">URL</FieldLabel>
-          <Input id="app-url" placeholder="picki.pknspace.com" value={form.url} onChange={set("url")} required />
+          <FieldLabel htmlFor="app-web">Web</FieldLabel>
+          <Input id="app-web" placeholder="picki.pknspace.com" value={form.web} onChange={set("web")} />
+          <FieldDescription>The live site; the only link with a status check.</FieldDescription>
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="app-android">Android</FieldLabel>
+          <Input id="app-android" placeholder="github.com/mepkn/alp/releases/latest" value={form.android} onChange={set("android")} />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="app-desktop">Desktop</FieldLabel>
+          <Input id="app-desktop" value={form.desktop} onChange={set("desktop")} />
+          <FieldDescription>Fill in at least one of web, Android and desktop.</FieldDescription>
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="app-repo">Source</FieldLabel>
+          <Input id="app-repo" placeholder="github.com/mepkn/alp" value={form.repo} onChange={set("repo")} />
         </Field>
         <Field>
           <FieldLabel htmlFor="app-group">Group</FieldLabel>
@@ -108,6 +135,10 @@ function AppForm({ app, groups, onClose }: Props) {
           <FieldLabel htmlFor="app-icon">Icon URL</FieldLabel>
           <Input id="app-icon" value={form.icon} onChange={set("icon")} />
           <FieldDescription>Optional. Defaults to the app's favicon.</FieldDescription>
+        </Field>
+        <Field orientation="horizontal">
+          <Switch id="app-private" checked={isPrivate} onCheckedChange={setPrivate} />
+          <FieldLabel htmlFor="app-private">Private: only editors see it</FieldLabel>
         </Field>
         {error && <FieldError>{error}</FieldError>}
       </FieldGroup>

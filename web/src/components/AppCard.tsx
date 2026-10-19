@@ -1,12 +1,12 @@
 import { motion } from "framer-motion";
-import { ArrowDown, ArrowUp, Pencil } from "lucide-react";
+import { ArrowDown, ArrowUp, Code, Globe, Lock, Monitor, Pencil, Smartphone, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 import type { Doc } from "@convex/_generated/dataModel";
 import { IconButton } from "@/components/IconButton";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { AppStatus } from "@/lib/live";
-import { cn, hostname, iconCandidates } from "@/lib/utils";
+import { cn, hostname, iconCandidates, primaryLink } from "@/lib/utils";
 
 type Props = {
   app: Doc<"apps">;
@@ -34,16 +34,24 @@ function StatusDot({ status, stale }: { status: AppStatus | undefined; stale: bo
   );
 }
 
+const PLATFORMS: { key: "web" | "android" | "desktop" | "repo"; label: string; icon: LucideIcon }[] = [
+  { key: "web", label: "Web", icon: Globe },
+  { key: "android", label: "Android", icon: Smartphone },
+  { key: "desktop", label: "Desktop", icon: Monitor },
+  { key: "repo", label: "Source", icon: Code },
+];
+
 export function AppCard({ app, status, stale, editing, onEdit, onMove }: Props) {
   const [iconIndex, setIconIndex] = useState(0);
   // Wait for the status check before fetching favicons, and skip them on 401
   // (Basic Auth) sites, where the request would trigger the browser's sign-in prompt.
-  const icon = iconCandidates(app.url, app.icon, status !== undefined && status.code !== 401)[iconIndex];
+  const links = PLATFORMS.filter((p) => app[p.key]);
+  const icon = iconCandidates(app.web, app.icon, status !== undefined && status.code !== 401)[iconIndex];
 
   return (
     <motion.div layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="group relative">
       <a
-        href={app.url}
+        href={primaryLink(app)}
         target="_blank"
         rel="noreferrer"
         className="glass relative flex items-center gap-3.5 rounded-2xl p-4 overflow-hidden transition duration-300 hover:-translate-y-0.5 hover:border-white/15 focus-visible:outline-2 focus-visible:outline-ring"
@@ -60,14 +68,39 @@ export function AppCard({ app, status, stale, editing, onEdit, onMove }: Props) 
         <span className="relative min-w-0 flex-1">
           <span className="flex items-center gap-2">
             <span className="truncate font-medium">{app.name}</span>
-            <StatusDot status={status} stale={stale} />
+            {app.web && <StatusDot status={status} stale={stale} />}
+            {app.private && (
+              <Tooltip>
+                <TooltipTrigger render={<span role="img" aria-label="Private" />} className="text-muted-foreground">
+                  <Lock className="size-3" />
+                </TooltipTrigger>
+                <TooltipContent>Private: only editors see it</TooltipContent>
+              </Tooltip>
+            )}
+            {app.web && status?.up && !stale && (
+              <Badge variant="outline" className="ml-auto font-mono tabular-nums text-muted-foreground">{status.ms}ms</Badge>
+            )}
           </span>
-          <span className="block truncate text-xs text-muted-foreground">{app.description || hostname(app.url)}</span>
+          <span className="block truncate text-xs text-muted-foreground" style={{ paddingRight: links.length * 24 }}>{app.description || (app.web ? hostname(app.web) : "")}</span>
         </span>
-        {status?.up && !stale && (
-          <Badge variant="outline" className="relative font-mono tabular-nums text-muted-foreground">{status.ms}ms</Badge>
-        )}
       </a>
+
+      {/* Platform links sit outside the card's <a>, since links can't nest. */}
+      <div className="absolute right-3 bottom-2 flex gap-0.5">
+        {links.map(({ key, label, icon: Icon }) => (
+          <a
+            key={key}
+            href={app[key]}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={`${app.name}: ${label}`}
+            title={label}
+            className="grid size-6 place-items-center rounded-md text-muted-foreground/70 transition hover:bg-white/10 hover:text-foreground"
+          >
+            <Icon className="size-3.5" />
+          </a>
+        ))}
+      </div>
 
       {editing && (
         <div className="absolute -top-2.5 right-2 flex gap-1">

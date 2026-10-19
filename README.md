@@ -7,7 +7,10 @@ fast it answered, under a strip of live CPU, memory, disk and uptime.
 ## Features
 
 - App cards grouped by section, with the app's own favicon (falls back to its first letter).
-- Live status: green/red dot and response time for each app, checked every minute.
+- Platform links on each card: web, Android, desktop and source, any of them. The card opens the
+  web app, or the Android or desktop download when there is no web app.
+- Private apps (niji, pralekh) are only listed for signed-in editors, marked with a lock.
+- Live status: green/red dot and response time for each app with a web link, checked every minute.
 - Server stats: CPU %, memory, disk and uptime of the VPS.
 - Search: `/` to focus, Enter opens the first match, Esc clears.
 - Edit mode at `/edit`: sign in with an email on `ALLOWED_EMAILS` to add, edit, delete and
@@ -30,8 +33,8 @@ npm run setup:auth && npx convex env set SITE_URL http://localhost:5173 && npx c
 cd ../web && npm install && npm run dev   # in a second terminal
 ```
 
-`web/public/live/status.json` and `stats.json` are sample files, so the status dots and stats
-strip work locally without the VPS.
+`web/public/live/stats.json` is a sample file, so the stats strip works locally without the VPS.
+`status.json` is keyed by app id, so its sample entries don't match local apps and the dots stay grey.
 
 ## Scripts
 
@@ -63,6 +66,8 @@ One-time VPS setup (already done):
 rsync -az -e "ssh -p 20044" server/ pkn@37.187.139.100:dash-server/
 ssh -p 20044 pkn@37.187.139.100 'bash ~/dash-server/setup.sh'   # folders + Caddy site, no sudo
 # crontab -e (as pkn):
+# openssl rand -hex 32 > ~/dash-server/.live-token; chmod 600 ~/dash-server/.live-token
+# (and on Convex: npx convex env set --prod LIVE_TOKEN <same value>)
 # * * * * * /usr/bin/python3 /home/pkn/dash-server/live.py /var/www/dash-live https://whimsical-guineapig-290.convex.cloud >/dev/null 2>&1
 ```
 
@@ -72,14 +77,18 @@ routes `dash.pknspace.com` to `http://localhost:8080`, like the other apps.
 
 ## How it works
 
-- `backend/convex/` holds one `apps` table (name, URL, group, description, icon, order).
-  Reads are public; every write checks that the caller is signed in and their email is in
-  `ALLOWED_EMAILS` (at sign-in and again on every write).
+- `backend/convex/` holds one `apps` table (name, web / android / desktop / repo links, private,
+  group, description, icon, order). Reads are public except private apps, which `apps.list`
+  returns only to editors; every write checks that the caller is signed in and their email is in
+  `ALLOWED_EMAILS` (at sign-in and again on every write). For Android links, use a GitHub
+  Release (`releases/latest`): Actions artifacts expire after 90 days and need a login.
 - Status and stats never touch Convex, to stay well inside the free plan. `server/live.py`
   runs from cron every minute: it checks each app's URL, samples CPU, memory and disk, and
   writes `status.json` / `stats.json` atomically. HTTP 200–399 counts as up, and so does 401,
-  since a password-protected app is running even though the check can't log in. It refreshes the app list from Convex at
-  most once an hour (cached in `apps.json`), about 720 calls a month.
+  since a password-protected app is running even though the check can't log in. It gets the web links to check from
+  `apps:monitorTargets`, which needs `LIVE_TOKEN` (in `~/dash-server/.live-token` on the VPS and
+  in the Convex env), at most once an hour (cached in `targets.json`), about 720 calls a month.
+  `status.json` is keyed by app id, so it never names a private app.
 - The page polls `/live/*.json` every 30 s while the tab is visible, so numbers are at most
   about 90 s old. Response time is measured from the VPS through Cloudflare, so it is the
   public round trip, not your browser's load time.

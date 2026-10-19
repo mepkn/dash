@@ -18,9 +18,9 @@ export function hostname(url: string): string {
  * `siteIcons: false` skips the favicons, e.g. for Basic Auth sites, where fetching
  * one makes the browser pop up a sign-in prompt.
  */
-export function iconCandidates(url: string, custom?: string, siteIcons = true): string[] {
+export function iconCandidates(url: string | undefined, custom?: string, siteIcons = true): string[] {
   const candidates = custom ? [custom] : [];
-  if (!siteIcons) return candidates;
+  if (!siteIcons || !url) return candidates;
   try {
     candidates.push(new URL("/favicon.svg", url).href, new URL("/favicon.ico", url).href);
   } catch {
@@ -51,4 +51,11 @@ export function groupBy<T>(items: T[], key: (item: T) => string): [string, T[]][
     groups.set(k, [...(groups.get(k) ?? []), item]);
   }
   return [...groups];
+}
+
+export type Links = { web?: string; android?: string; desktop?: string };
+
+/** Where clicking the card goes: the web app, else the Android or desktop download. */
+export function primaryLink(app: Links): string {
+  return app.web ?? app.android ?? app.desktop ?? "";
 }

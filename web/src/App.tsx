@@ -13,7 +13,7 @@ import { Kbd } from "@/components/ui/kbd";
 import { EditGate } from "@/components/EditGate";
 import { isEditRoute } from "@/lib/route";
 import { useLive, type Stats, type Status } from "@/lib/live";
-import { groupBy, hostname } from "@/lib/utils";
+import { groupBy, hostname, primaryLink } from "@/lib/utils";
 
 // live.py runs every minute; older than this means the cron stopped.
 const STALE_AFTER_SEC = 5 * 60;
@@ -65,12 +65,13 @@ function Dashboard({ canEdit }: { canEdit: boolean }) {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!apps || !q) return apps ?? [];
-    return apps.filter((a) => [a.name, a.group, a.description ?? "", hostname(a.url)].some((s) => s.toLowerCase().includes(q)));
+    return apps.filter((a) => [a.name, a.group, a.description ?? "", hostname(a.web ?? "")].some((s) => s.toLowerCase().includes(q)));
   }, [apps, query]);
 
   const groups = useMemo(() => groupBy(filtered, (a) => a.group), [filtered]);
   const stale = !status || (!import.meta.env.DEV && now.getTime() / 1000 - status.checkedAt > STALE_AFTER_SEC);
-  const upCount = apps?.filter((a) => status?.apps[a.url]?.up).length ?? 0;
+  const upCount = apps?.filter((a) => status?.apps[a._id]?.up).length ?? 0;
+  const webCount = apps?.filter((a) => a.web).length ?? 0;
 
   const move = (id: Id<"apps">, dir: -1 | 1) => {
     if (!apps) return;
@@ -95,7 +96,7 @@ function Dashboard({ canEdit }: { canEdit: boolean }) {
           <p className="mt-1 text-sm text-muted-foreground">
             {now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" })}
             {apps && !stale && (
-              <span className="ml-2 font-mono text-xs text-muted-foreground/70">· {upCount}/{apps.length} up</span>
+              <span className="ml-2 font-mono text-xs text-muted-foreground/70">· {upCount}/{webCount} up</span>
             )}
           </p>
         </div>
@@ -107,7 +108,7 @@ function Dashboard({ canEdit }: { canEdit: boolean }) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && filtered[0]) window.open(filtered[0].url, "_blank", "noreferrer");
+                if (e.key === "Enter" && filtered[0]) window.open(primaryLink(filtered[0]), "_blank", "noreferrer");
                 if (e.key === "Escape") setQuery("");
               }}
               placeholder="Search apps"
@@ -153,7 +154,7 @@ function Dashboard({ canEdit }: { canEdit: boolean }) {
                 <AppCard
                   key={app._id}
                   app={app}
-                  status={status?.apps[app.url]}
+                  status={app.web ? status?.apps[app._id] : undefined}
                   stale={stale}
                   editing={canEdit}
                   onEdit={() => setEditing(app)}

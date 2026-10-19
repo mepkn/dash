@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatUptime, groupBy, hostname, iconCandidates, normalizeUrl } from "./utils";
+import { formatUptime, groupBy, hostname, iconCandidates, normalizeUrl, primaryLink } from "./utils";
 
 describe("normalizeUrl", () => {
   it("adds https and strips trailing slashes", () => {
@@ -39,5 +39,13 @@ describe("iconCandidates", () => {
     ]);
     expect(iconCandidates("nope")).toEqual([]);
     expect(iconCandidates("https://a.com", "https://cdn/i.png", false)).toEqual(["https://cdn/i.png"]);
+  });
+});
+
+describe("primaryLink", () => {
+  it("prefers web, then android, then desktop", () => {
+    expect(primaryLink({ web: "w", android: "a" })).toBe("w");
+    expect(primaryLink({ android: "a", desktop: "d" })).toBe("a");
+    expect(primaryLink({ desktop: "d" })).toBe("d");
   });
 });

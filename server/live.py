@@ -3,8 +3,10 @@
 
     * * * * * /usr/bin/python3 /home/pkn/dash-server/live.py /var/www/dash-live https://<deployment>.convex.cloud
 
-The app list is fetched from Convex at most once an hour (cached in apps.json
-next to this script), so monitoring costs ~720 Convex calls a month. Standard
+The web links to check are fetched from Convex (apps:monitorTargets, which needs
+the LIVE_TOKEN kept in .live-token next to this script) at most once an hour,
+cached in targets.json, so monitoring costs ~720 Convex calls a month. Results are
+keyed by app id, so the public status.json never names a private app. Standard
 library only: the VPS has no jq or pip packages.
 """
 import json
@@ -16,7 +18,8 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-APPS_CACHE = Path(__file__).with_name("apps.json")
+APPS_CACHE = Path(__file__).with_name("targets.json")
+TOKEN_FILE = Path(__file__).with_name(".live-token")
 APPS_MAX_AGE = 3600
 TIMEOUT = 10
 
@@ -28,25 +31,32 @@ def write_json(path: Path, data) -> None:
     os.replace(tmp, path)
 
 
-def load_apps(convex_url: str) -> list[str]:
+def load_apps(convex_url: str) -> list[dict]:
     fresh = APPS_CACHE.exists() and time.time() - APPS_CACHE.stat().st_mtime < APPS_MAX_AGE
     if not fresh:
         try:
             req = urllib.request.Request(
                 f"{convex_url}/api/query",
-                data=json.dumps({"path": "apps:list", "args": {}, "format": "json"}).encode(),
+                data=json.dumps({
+                    "path": "apps:monitorTargets",
+                    "args": {"token": TOKEN_FILE.read_text().strip()},
+                    "format": "json",
+                }).encode(),
                 headers={"Content-Type": "application/json"},
             )
             with urllib.request.urlopen(req, timeout=TIMEOUT) as res:
                 body = json.load(res)
             if body.get("status") == "success":
-                write_json(APPS_CACHE, [a["url"] for a in body["value"]])
+                write_json(APPS_CACHE, body["value"])
+            else:
+                print(f"apps fetch failed: {body.get('errorMessage')}", file=sys.stderr)
         except Exception as e:  # keep using the stale cache
             print(f"apps fetch failed: {e}", file=sys.stderr)
     return json.loads(APPS_CACHE.read_text()) if APPS_CACHE.exists() else []
 
 
-def check(url: str) -> tuple[str, dict]:
+def check(app: dict) -> tuple[str, dict]:
+    url = app["url"]
     start = time.monotonic()
     req = urllib.request.Request(url, method="GET", headers={"User-Agent": "pknspace-dash/1"})
     try:
@@ -58,7 +68,7 @@ def check(url: str) -> tuple[str, dict]:
         code = 0
     ms = round((time.monotonic() - start) * 1000)
     # 401 means the server answered and wants a login (e.g. Basic Auth), so it's up.
-    return url, {"up": 200 <= code < 400 or code == 401, "code": code, "ms": ms}
+    return app["id"], {"up": 200 <= code < 400 or code == 401, "code": code, "ms": ms}
 
 
 def cpu_percent() -> float:
