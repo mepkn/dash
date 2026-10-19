@@ -149,7 +149,7 @@ function Dashboard({ canEdit }: { canEdit: boolean }) {
               {group}
               <span className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent" />
             </h2>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {items.map((app) => (
                 <AppCard
                   key={app._id}

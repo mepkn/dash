@@ -49,7 +49,7 @@ export function AppCard({ app, status, stale, editing, onEdit, onMove }: Props) 
   const icon = iconCandidates(app.web, app.icon, status !== undefined && status.code !== 401)[iconIndex];
 
   return (
-    <motion.div layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="group relative">
+    <motion.div layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="group relative min-w-0">
       <a
         href={primaryLink(app)}
         target="_blank"
