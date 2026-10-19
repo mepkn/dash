@@ -146,7 +146,8 @@ function Dashboard({ canEdit }: { canEdit: boolean }) {
         {groups.map(([group, items]) => (
           <section key={group}>
             <h2 className="mb-3 flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
-              {group}
+              {/* Counts the cards shown, so visitors never see private apps counted. */}
+              <span>{group} <span className="text-muted-foreground/60">({items.length})</span></span>
               <span className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent" />
             </h2>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
