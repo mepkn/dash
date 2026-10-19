@@ -56,8 +56,11 @@ export const update = mutation({
   handler: async (ctx, { id, ...app }) => {
     await requireEditor(ctx);
     requireLink(app);
-    // Clear retired fields on old rows.
-    await ctx.db.patch(id, { ...app, url: undefined, accent: undefined });
+    // Optional fields left empty in the form arrive missing (undefined isn't sent over the
+    // wire), so clear each one explicitly; patch() removes a field set to undefined.
+    // The retired url and accent fields are cleared on old rows too.
+    const cleared = { web: undefined, android: undefined, desktop: undefined, repo: undefined, private: undefined, description: undefined, icon: undefined, url: undefined, accent: undefined };
+    await ctx.db.patch(id, { ...cleared, ...app });
   },
 });
 
