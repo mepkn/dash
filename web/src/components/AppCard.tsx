@@ -34,11 +34,12 @@ function StatusDot({ status, stale }: { status: AppStatus | undefined; stale: bo
   );
 }
 
-const PLATFORMS: { key: "web" | "android" | "desktop" | "repo"; label: string; icon: LucideIcon }[] = [
-  { key: "web", label: "Web", icon: Globe },
-  { key: "android", label: "Android", icon: Smartphone },
-  { key: "desktop", label: "Desktop", icon: Monitor },
-  { key: "repo", label: "Source", icon: Code },
+// Each platform has its own colour so the icons tell apart at a glance.
+const PLATFORMS: { key: "web" | "android" | "desktop" | "repo"; label: string; icon: LucideIcon; color: string }[] = [
+  { key: "web", label: "Web", icon: Globe, color: "bg-sky-400/15 text-sky-300 hover:bg-sky-400/30" },
+  { key: "android", label: "Android", icon: Smartphone, color: "bg-emerald-400/15 text-emerald-300 hover:bg-emerald-400/30" },
+  { key: "desktop", label: "Desktop", icon: Monitor, color: "bg-violet-400/15 text-violet-300 hover:bg-violet-400/30" },
+  { key: "repo", label: "Source", icon: Code, color: "bg-amber-400/15 text-amber-300 hover:bg-amber-400/30" },
 ];
 
 export function AppCard({ app, status, stale, editing, onEdit, onMove }: Props) {
@@ -81,13 +82,13 @@ export function AppCard({ app, status, stale, editing, onEdit, onMove }: Props) 
               <Badge variant="outline" className="ml-auto font-mono tabular-nums text-muted-foreground">{status.ms}ms</Badge>
             )}
           </span>
-          <span className="block truncate text-xs text-muted-foreground" style={{ paddingRight: links.length * 24 }}>{app.description || (app.web ? hostname(app.web) : "")}</span>
+          <span className="block truncate text-xs text-muted-foreground" style={{ paddingRight: links.length * 28 }}>{app.description || (app.web ? hostname(app.web) : "")}</span>
         </span>
       </a>
 
       {/* Platform links sit outside the card's <a>, since links can't nest. */}
-      <div className="absolute right-3 bottom-2 flex gap-0.5">
-        {links.map(({ key, label, icon: Icon }) => (
+      <div className="absolute right-3 bottom-2 flex gap-1">
+        {links.map(({ key, label, icon: Icon, color }) => (
           <a
             key={key}
             href={app[key]}
@@ -95,7 +96,7 @@ export function AppCard({ app, status, stale, editing, onEdit, onMove }: Props) 
             rel="noreferrer"
             aria-label={`${app.name}: ${label}`}
             title={label}
-            className="grid size-6 place-items-center rounded-md text-muted-foreground/70 transition hover:bg-white/10 hover:text-foreground"
+            className={cn("grid size-6 place-items-center rounded-full transition", color)}
           >
             <Icon className="size-3.5" />
           </a>
