@@ -3,6 +3,7 @@ import { Password } from "@convex-dev/auth/providers/Password";
 import { ConvexError } from "convex/values";
 import { query } from "./_generated/server";
 import { isEditorEmail } from "./lib/editors";
+import { ResendOTP, ResendOTPReset } from "./otp";
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [
@@ -17,6 +18,9 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
         if (!isEditorEmail(email)) {
           throw new ConvexError("This email is not on the editor allowlist.");
         }
+        // Convex Auth hands these same params to the verify provider, which
+        // stores params.email on the user, so normalize it there too.
+        params.email = email;
         return { email };
       },
       validatePasswordRequirements(password) {
@@ -24,6 +28,8 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
           throw new ConvexError("Password must be at least 8 characters.");
         }
       },
+      verify: ResendOTP,
+      reset: ResendOTPReset,
     }),
   ],
 });

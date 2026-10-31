@@ -15,6 +15,8 @@ fast it answered, under a strip of live CPU, memory, disk and uptime.
 - Search: `/` to focus, Enter opens the first match, Esc clears.
 - Edit mode at `/edit`: sign in with an email on `ALLOWED_EMAILS` to add, edit, delete and
   reorder apps. `/` is the read-only dashboard for everyone; nothing on it links to `/edit`.
+  Sign-up sends a 6-digit code by email to verify the address; "Forgot password?" resets the
+  password with a code too.
 
 ## Stack
 
@@ -58,7 +60,9 @@ in each part's `.env.prod.local` (git-ignored, see the `.env.example` next to ea
 `backend/`, `DEPLOY_HOST` / `DEPLOY_PORT` / `DEPLOY_DIR` in `web/`, and `SERVER_DIR` / `LIVE_DIR`
 in `server/`. Set up auth on the production deployment once, in `backend/`:
 `node scripts/setup-auth-keys.ts --apply --prod`, `npx convex env set --prod SITE_URL https://dash.pknspace.com`
-and `npx convex env set --prod ALLOWED_EMAILS you@example.com`.
+and `npx convex env set --prod ALLOWED_EMAILS you@example.com`. `RESEND_API_KEY` (the Resend key
+`dash-api-key`, for the code emails) is set with `../scripts/set-resend-key.sh dash`, run from
+this repo with the key on the clipboard.
 
 One-time VPS setup (already done):
 
@@ -82,6 +86,12 @@ routes `dash.pknspace.com` to `http://localhost:8080`, like the other apps.
   returns only to editors; every write checks that the caller is signed in and their email is in
   `ALLOWED_EMAILS` (at sign-in and again on every write). For Android links, use a GitHub
   Release (`releases/latest`): Actions artifacts expire after 90 days and need a login.
+- `backend/convex/auth.ts` is Convex Auth's Password provider with `verify` and `reset` from
+  `backend/convex/otp.ts`, which emails 6-digit codes through Resend from
+  `dash <noreply@send.pknspace.com>`. Without `RESEND_API_KEY` (local dev) the code is only
+  logged in the `npx convex dev` output. Prod env vars: `JWT_PRIVATE_KEY`, `JWKS`, `SITE_URL`,
+  `ALLOWED_EMAILS`, `LIVE_TOKEN`, `RESEND_API_KEY`. `web/src/components/SignInPage.tsx` has the
+  sign-in, sign-up, code and reset steps.
 - Status and stats never touch Convex, to stay well inside the free plan. `server/live.py`
   runs from cron every minute: it checks each app's URL, samples CPU, memory and disk, and
   writes `status.json` / `stats.json` atomically. HTTP 200–399 counts as up, and so does 401,
