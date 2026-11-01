@@ -3,7 +3,7 @@ import { formatUptime, groupBy, hostname, iconCandidates, normalizeUrl, primaryL
 
 describe("normalizeUrl", () => {
   it("adds https and strips trailing slashes", () => {
-    expect(normalizeUrl(" picki.pknspace.com/ ")).toBe("https://picki.pknspace.com");
+    expect(normalizeUrl(" chayan.pknspace.com/ ")).toBe("https://chayan.pknspace.com");
     expect(normalizeUrl("http://x.dev")).toBe("http://x.dev");
   });
 });

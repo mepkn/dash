@@ -106,7 +106,7 @@ function AppForm({ app, groups, onClose }: Props) {
         </Field>
         <Field>
           <FieldLabel htmlFor="app-web">Web</FieldLabel>
-          <Input id="app-web" placeholder="picki.pknspace.com" value={form.web} onChange={set("web")} />
+          <Input id="app-web" placeholder="chayan.pknspace.com" value={form.web} onChange={set("web")} />
           <FieldDescription>The live site; the only link with a status check.</FieldDescription>
         </Field>
         <Field>
