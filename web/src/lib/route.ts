@@ -1,5 +1,5 @@
 /**
- * Two entry points, like syntax-party:
+ * Two entry points, like lipi:
  *   /       read-only dashboard, for everyone
  *   /edit   sign-in, then the same dashboard with editing turned on
  */
